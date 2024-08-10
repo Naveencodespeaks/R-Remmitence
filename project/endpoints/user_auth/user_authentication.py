@@ -38,7 +38,7 @@ def admin_login(request: Login, db: Session = Depends(get_database_session)):
         db.rollback()
         return Utility.json_response(status=EXCEPTION, message="Something went wrong", error=[], data={})
 
-
+'''
 @router.post("/register", response_description="User Registration")
 async def register(request: Register, db: Session = Depends(get_database_session)):
     try:
@@ -88,3 +88,5 @@ def get_users(auth_user=Depends(AuthHandler().auth_wrapper), db: Session = Depen
     except Exception as E:
         print(E)
         return Utility.json_response(status=FAIL, message="Something went wrong", error=[], data={})
+
+'''

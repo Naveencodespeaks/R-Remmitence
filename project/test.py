@@ -39,7 +39,8 @@
 # )
 # SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=Engine)
 #
-# Base = declarative_base()
+#Base = declarative_base()
+#from project.database.database import Base 
 
 
 
