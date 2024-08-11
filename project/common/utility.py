@@ -1,5 +1,6 @@
 from fastapi.responses import JSONResponse
 import uuid
+import random
 
 
 class Utility:
@@ -22,6 +23,12 @@ class Utility:
             'result': data,
             "code": code if code else''
         })
+    @staticmethod
+    def generate_otp(n: int) -> int:
+        range_start = 10**(n-1)
+        range_end = (10**n) - 1
+        otp = random.randint(range_start, range_end)
+        return otp
 
     @staticmethod
     def uuid():

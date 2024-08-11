@@ -16,11 +16,9 @@ class AdminUser(BaseModel):
     email = Column(String(161))
     mobile_no = Column(String(13))
     last_login = Column(DateTime, default= datetime.utcnow() )
-    role_id = Column(Integer, ForeignKey('md_user_roles.id'), nullable=False)  # Ensure this matches UserRole.id
-    role_details = relationship('MdUserRole', back_populates='admin_user')
-
-    status_id = Column(Integer, ForeignKey('md_user_status.id'),  nullable=False)
-    status_details = relationship('MdUserStatus', back_populates='admin_status')
+    role_id = Column(Integer, default=1)  # Ensure this matches UserRole.id
+    status_id = Column(Integer, default=3)
+    
 
 
     class Config:

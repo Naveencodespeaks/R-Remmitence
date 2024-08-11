@@ -16,7 +16,11 @@ class AuthHandler:
         return self.pwd_context.hash(password)
 
     def verify_password(self, plain_password, hashed_password):
-        return self.pwd_context.verify(plain_password, hashed_password)
+        try:
+            return self.pwd_context.verify(plain_password, hashed_password)
+        except Exception as e:
+            return False
+    
 
     def datetime_handler(self,x):
         if isinstance(x, datetime):

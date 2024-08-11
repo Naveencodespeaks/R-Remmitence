@@ -5,14 +5,18 @@
 	},
 	{
 		"id": 2,
-		"name": "Active"
+		"name": "Profile Pending"
 	},
 	{
 		"id": 3,
-		"name": "Inactive"
+		"name": "Active"
 	},
 	{
 		"id": 4,
+		"name": "Inactive"
+	},
+	{
+		"id": 5,
 		"name": "Delete"
 	}
 ]

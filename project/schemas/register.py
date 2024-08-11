@@ -5,9 +5,8 @@ from phonenumbers import NumberParseException, is_valid_number
 
 class Register(BaseModel):
     email: str
-    password: str
     mobile_no: str
-    contact: int
+
 
 class AdminRegister(BaseModel):
     email: EmailStr

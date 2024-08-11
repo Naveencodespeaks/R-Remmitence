@@ -48,11 +48,11 @@ async def register(request: AdminRegister, db: Session = Depends(get_database_se
             return Utility.json_response(status=SUCCESS, message="User Registered Successfully", error=[],
                                          data={"user_id": user_data.id})
         else:
-            return Utility.json_response(status=FAIL, message="Something went wrong11111", error=[], data={})
+            return Utility.json_response(status=FAIL, message="Something went wrong", error=[], data={})
     except Exception as E:
         print(E)
         db.rollback()
-        return Utility.json_response(status=FAIL, message="Something went wrong-----", error=[], data={})
+        return Utility.json_response(status=FAIL, message="Something went wrong", error=[], data={})
 
 
 @router.post("/login", response_description="Admin authenticated")
@@ -67,22 +67,25 @@ def admin_login(request: Login, db: Session = Depends(get_database_session)):
                         #AdminUser.login_token,
                         #AdminUser.password,
                         #AdminUser.id
-                        ).filter(AdminUser.email == email, AdminUser.role_id == 1)
+                        ).filter(AdminUser.email == email)
         if user.count() != 1:
             return Utility.json_response(status=FAIL, message="Invalid credential's", error=[], data={})
-        if user.one().status_id !=2:
+        if user.one().status_id !=3:
             msg = "Admin Profile is Deleted"
             if user.one().status_id == 1:
                 msg = "Admin Profile is Pending State"
-            if user.one().status_id == 3:
-                msg = "Admin Profile is Inactive State"
+            if user.one().status_id == 2:
+                msg = "Admin Profile is Pending State"
             if user.one().status_id == 4:
+                msg = "Admin Profile is Inactive State"    
+            if user.one().status_id == 5:
                 msg = "Admin Profile is Delete"
             return Utility.json_response(status=FAIL, message=msg, error=[], data={})
         user_data = user.one()
         verify_password = AuthHandler().verify_password(str(password), user_data.password)
+        print(verify_password)
         if not verify_password:
-            return Utility.json_response(status=FAIL, message="Invalid credential's", error=[], data={})
+            return Utility.json_response(status=FAIL, message=verify_password, error=[], data={})
         user_dict = {c.name: getattr(user_data, c.name) for c in user_data.__table__.columns}
         #print(user_dict)
         if "password" in user_dict:
@@ -99,8 +102,6 @@ def admin_login(request: Login, db: Session = Depends(get_database_session)):
         
         #print(user_data.status_details)
         #print(user_data.role)
-        user_data.status_details =user_data.status_details
-        user_data.role_details = user_data.role_details
         user_data.token = login_token
         del user_data.password
         del user_data.login_token
