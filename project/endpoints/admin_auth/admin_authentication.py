@@ -1,15 +1,17 @@
 from datetime import datetime, timezone
 from sqlalchemy import and_
 from datetime import datetime
-from project.models.admin_user import AdminUser
-from project.models.master_data_models import MdUserRole,MdUserStatus
+from ...models.admin_user import AdminUser
+from ...models.master_data_models import MdUserRole,MdUserStatus
 
 from . import APIRouter, Utility, SUCCESS, FAIL, EXCEPTION, Depends, Session, get_database_session, AuthHandler
 from ...schemas.register import AdminRegister
 import re
 from ...schemas.login import Login
-
-
+import os
+import json
+from pathlib import Path
+from ...models.master_data_models import MdCountries,MdLocations,MdReminderStatus,MdStates,MdTaskStatus,MdTenantStatus,MdTimeZone,MdUserRole,MdUserStatus
 # APIRouter creates path operations for product module
 router = APIRouter(
     prefix="/Admin",
@@ -83,7 +85,7 @@ def admin_login(request: Login, db: Session = Depends(get_database_session)):
             return Utility.json_response(status=FAIL, message=msg, error=[], data={})
         user_data = user.one()
         verify_password = AuthHandler().verify_password(str(password), user_data.password)
-        print(verify_password)
+
         if not verify_password:
             return Utility.json_response(status=FAIL, message=verify_password, error=[], data={})
         user_dict = {c.name: getattr(user_data, c.name) for c in user_data.__table__.columns}
@@ -110,3 +112,65 @@ def admin_login(request: Login, db: Session = Depends(get_database_session)):
         print(E)
         db.rollback()
         return Utility.json_response(status=EXCEPTION, message="Something went wrong", error=[], data={})
+
+@router.get("/get-users", response_description="User List")
+def get_users(auth_user=Depends(AuthHandler().auth_wrapper), db: Session = Depends(get_database_session)):
+    try:
+        return Utility.dict_response(status=SUCCESS, message="SUCCESS", error=[], data={})
+    except Exception as E:
+        print(E)
+        return Utility.json_response(status=FAIL, message="Something went wrong", error=[], data={})
+
+
+@router.get("/masterdata/migrate", response_description="User List")
+def get_users(db: Session = Depends(get_database_session)):
+    
+    return {"status": "FAIL", "message": "Something went wrong---"}
+    try:
+        
+        json_directory = Path(__file__).resolve().parent.parent.parent / "migrate_data"
+        file_to_model = {
+            "md_countries.json": MdCountries,
+            "md_states.json": MdStates,
+            "md_locations.json": MdLocations,
+            "md_reminder_status.json": MdReminderStatus,
+            "md_task_status.json": MdTaskStatus,
+            "md_tenant_status.json": MdTenantStatus,
+            "md_timezone.json": MdTimeZone,
+            "md_user_roles.json": MdUserRole,
+            "md_user_status.json": MdUserStatus
+        }
+
+        batch_size = 500
+
+        for filename in os.listdir(json_directory):
+            if filename in file_to_model:
+                model = file_to_model[filename]
+                file_path = json_directory / filename
+                
+                with open(file_path, 'r') as file:
+                    data = json.load(file)
+
+                batch = []
+                for entry in data:
+                    # Filter out any keys not matching the model's attributes
+                    filtered_entry = {key: value for key, value in entry.items() if hasattr(model, key)}
+                    
+                    record = model(**filtered_entry)
+                    batch.append(record)
+
+                    if len(batch) >= batch_size:
+                        db.bulk_save_objects(batch)
+                        batch.clear()
+
+                if batch:
+                    db.bulk_save_objects(batch)
+
+                db.commit()
+
+        return {"status": "SUCCESS", "message": "Data migrated successfully"}
+
+    except Exception as e:
+        db.rollback()
+        print(e)
+        return {"status": "FAIL", "message": "Something went wrong"}

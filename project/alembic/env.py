@@ -16,11 +16,11 @@ def load_models(package_name: str):
     """Load all modules in the given package and extract metadata."""
     for _, module_name, _ in pkgutil.iter_modules(importlib.import_module(package_name).__path__):
         module = importlib.import_module(f'{package_name}.{module_name}')
-        print(str(module))
+        
         # Iterate over attributes in the module
         for attribute_name in dir(module):
             attribute = getattr(module, attribute_name)
-            print(str(attribute))
+            
             
             # Check if the attribute is a model class (subclass of DeclarativeMeta)
             if isinstance(attribute, DeclarativeMeta):
