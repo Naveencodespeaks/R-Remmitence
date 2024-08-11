@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 #from project.database.database import Base
-
+from datetime import datetime
 #Base = declarative_base()
 from .base_model import BaseModel
 
@@ -15,8 +15,9 @@ class AdminUser(BaseModel):
     token = Column(Text)
     email = Column(String(161))
     mobile_no = Column(String(13))
+    last_login = Column(DateTime, default= datetime.utcnow() )
     role_id = Column(Integer, ForeignKey('md_user_roles.id'), nullable=False)  # Ensure this matches UserRole.id
-    role = relationship('MdUserRole', back_populates='admin_user')
+    role_details = relationship('MdUserRole', back_populates='admin_user')
 
     status_id = Column(Integer, ForeignKey('md_user_status.id'),  nullable=False)
     status_details = relationship('MdUserStatus', back_populates='admin_status')

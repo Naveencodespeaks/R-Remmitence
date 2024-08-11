@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from sqlalchemy import and_
-
+from datetime import datetime
 from project.models.admin_user import AdminUser
 from project.models.master_data_models import MdUserRole,MdUserStatus
 
@@ -79,23 +79,33 @@ def admin_login(request: Login, db: Session = Depends(get_database_session)):
             if user.one().status_id == 4:
                 msg = "Admin Profile is Delete"
             return Utility.json_response(status=FAIL, message=msg, error=[], data={})
-        verify_password = AuthHandler().verify_password(str(password), user.one().password)
+        user_data = user.one()
+        verify_password = AuthHandler().verify_password(str(password), user_data.password)
         if not verify_password:
             return Utility.json_response(status=FAIL, message="Invalid credential's", error=[], data={})
-        login_token = AuthHandler().encode_token(user.one().id)
+        user_dict = {c.name: getattr(user_data, c.name) for c in user_data.__table__.columns}
+        #print(user_dict)
+        if "password" in user_dict:
+            del user_dict["password"]
+        if "token" in user_dict:
+            del user_dict["token"]
+        login_token = AuthHandler().encode_token(user_dict)
+        
         if not login_token:
             return Utility.json_response(status=FAIL, message="Token not assigned", error=[], data={})
-        user.update({AdminUser.login_token: login_token}, synchronize_session=False)
+        user.update({AdminUser.token: login_token, AdminUser.last_login:datetime.utcnow()}, synchronize_session=False)
         db.flush()
         db.commit()
-        user_data = user.one()
+        
         #print(user_data.status_details)
         #print(user_data.role)
         user_data.status_details =user_data.status_details
-        user_data.role = user_data.role
+        user_data.role_details = user_data.role_details
+        user_data.token = login_token
         del user_data.password
         del user_data.login_token
         return Utility.dict_response(status=SUCCESS, message="Logged in successfully", error=[], data=user_data)
     except Exception as E:
+        print(E)
         db.rollback()
         return Utility.json_response(status=EXCEPTION, message="Something went wrong", error=[], data={})

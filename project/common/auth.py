@@ -4,7 +4,8 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from project.constant.status_constant import FAIL
-
+import ast
+import json
 
 class AuthHandler:
     security = HTTPBearer()
@@ -17,22 +18,27 @@ class AuthHandler:
     def verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)
 
-    def encode_token(self, user_id):
+    def datetime_handler(self,x):
+        if isinstance(x, datetime):
+            return x.isoformat()
+        return x #TypeError("Type not serializable")
+    
+    def encode_token(self, user_dict):
         payload = {
             'exp': datetime.utcnow() + timedelta(days=0, minutes=60),
             'iat': datetime.utcnow(),
-            'sub': user_id
+            'sub': json.dumps(user_dict,default=self.datetime_handler)
         }
         return jwt.encode(
             payload,
             self.secret,
             algorithm='HS256'
         )
-
     def decode_token(self, token):
         try:
             payload = jwt.decode(token, self.secret, algorithms=['HS256'])
-            return payload['sub']
+            return json.loads(payload['sub'], )
+            
         except jwt.ExpiredSignatureError:
             response = {}
             response.update(status=FAIL, message="Signature has expired", error=[], data={})

@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 #Base = declarative_base()
 from  .base_model import BaseModel
 
-class User(BaseModel):
+class UserModel(BaseModel):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_name = Column(String(61))

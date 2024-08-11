@@ -4,6 +4,6 @@ Base = declarative_base()
 #from project.database.database import Base 
 #from .admin_user import MdUserRole,MdUserStatus
 from .master_data_models import MdUserRole, MdUserStatus 
-from .user import User
+from .user_model import UserModel
 from .admin_user import AdminUser
 
