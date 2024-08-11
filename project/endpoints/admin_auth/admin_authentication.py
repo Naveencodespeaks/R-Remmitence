@@ -1,7 +1,9 @@
 from datetime import datetime, timezone
 from sqlalchemy import and_
 
-from project.models.admin_user import MdUserRole,MdUserStatus, AdminUser
+from project.models.admin_user import AdminUser
+from project.models.master_data_models import MdUserRole,MdUserStatus
+
 from . import APIRouter, Utility, SUCCESS, FAIL, EXCEPTION, Depends, Session, get_database_session, AuthHandler
 from ...schemas.register import AdminRegister
 import re
@@ -37,10 +39,11 @@ async def register(request: AdminRegister, db: Session = Depends(get_database_se
         if len(user_with_email) != 0:
             return Utility.json_response(status=FAIL, message="Email already exists", error=[], data={})
 
-        user_data = AdminUser( email=email,user_name=user_name, mobile_no=contact,password=AuthHandler().get_password_hash(str(password)))
+        user_data = AdminUser(role_id =1,status_id=1, email=email,user_name=user_name, mobile_no=contact,password=AuthHandler().get_password_hash(str(password)))
         db.add(user_data)
         db.flush()
         db.commit()
+        
         if user_data.id:
             return Utility.json_response(status=SUCCESS, message="User Registered Successfully", error=[],
                                          data={"user_id": user_data.id})
@@ -57,11 +60,24 @@ def admin_login(request: Login, db: Session = Depends(get_database_session)):
     try:
         email = request.email
         password = request.password
-        user = db.query(AdminUser).filter(AdminUser.email == email, AdminUser.role_id == 1)
+        user = db.query(AdminUser,
+                        #AdminUser.email,
+                        #AdminUser.status_id,
+                        #AdminUser.user_name,
+                        #AdminUser.login_token,
+                        #AdminUser.password,
+                        #AdminUser.id
+                        ).filter(AdminUser.email == email, AdminUser.role_id == 1)
         if user.count() != 1:
             return Utility.json_response(status=FAIL, message="Invalid credential's", error=[], data={})
-        if user.status_id !=2:
-            msg = "Admin Profile is Inactive" if user.status_id == 3 else "Admin Profile is Deleted" if user.status_id == 4 else "Admin Profile is Inactive"
+        if user.one().status_id !=2:
+            msg = "Admin Profile is Deleted"
+            if user.one().status_id == 1:
+                msg = "Admin Profile is Pending State"
+            if user.one().status_id == 3:
+                msg = "Admin Profile is Inactive State"
+            if user.one().status_id == 4:
+                msg = "Admin Profile is Delete"
             return Utility.json_response(status=FAIL, message=msg, error=[], data={})
         verify_password = AuthHandler().verify_password(str(password), user.one().password)
         if not verify_password:
@@ -69,11 +85,17 @@ def admin_login(request: Login, db: Session = Depends(get_database_session)):
         login_token = AuthHandler().encode_token(user.one().id)
         if not login_token:
             return Utility.json_response(status=FAIL, message="Token not assigned", error=[], data={})
-        user.update({AdminUser.token: login_token}, synchronize_session=False)
+        user.update({AdminUser.login_token: login_token}, synchronize_session=False)
         db.flush()
         db.commit()
-        return Utility.dict_response(status=SUCCESS, message="Logged in successfully", error=[], data=user.one())
+        user_data = user.one()
+        #print(user_data.status_details)
+        #print(user_data.role)
+        user_data.status_details =user_data.status_details
+        user_data.role = user_data.role
+        del user_data.password
+        del user_data.login_token
+        return Utility.dict_response(status=SUCCESS, message="Logged in successfully", error=[], data=user_data)
     except Exception as E:
-        print(E)
         db.rollback()
         return Utility.json_response(status=EXCEPTION, message="Something went wrong", error=[], data={})
