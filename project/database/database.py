@@ -9,7 +9,7 @@ load_dotenv()
 Base = declarative_base()
 
 
-database_url = os.environ.get("DATABASE_URL","mysql+pymysql://remit_admin:remit_admin@localhost/remit")
+database_url = os.environ.get("DATABASE_URL","mysql+pymysql://remit_admin:remit_admin@127.0.0.1/remit")
 engine = create_engine(database_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

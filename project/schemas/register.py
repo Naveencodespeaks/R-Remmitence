@@ -10,9 +10,9 @@ class Register(BaseModel):
 
 class AdminRegister(BaseModel):
     email: EmailStr
-    mobile_no: str| int
-    user_name: str| int #constr(min_length=3, max_length=50)
-    password: str| int #constr(min_length=8)
+    mobile_no: str
+    user_name: str #constr(min_length=3, max_length=50)
+    password: str #constr(min_length=8)
 
     '''
     @field_validator('passworddd')
