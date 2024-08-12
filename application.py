@@ -4,6 +4,7 @@ from project.routes.api import router as api_router
 from project.common.utility import Utility
 from project.constant.status_constant import SUCCESS, FAIL
 from fastapi.responses import FileResponse
+import uvicorn
 
 # This way all the tables can be created in database but cannot be updated for that use alembic migrations
 # user.Base.metadata.create_all(bind=engine)
@@ -39,6 +40,6 @@ def images(path: str, image: str):
     file_location = f"project/media/images/{path}/{image}"
     return FileResponse(file_location)
 
-# if __name__ == '__main__':
-#     uvicorn.run("application:app", host='localhost', port=8000, log_level="debug", reload=True)
-#     print("running")
+if __name__ == '__main__':
+    uvicorn.run("application:app", host='localhost', port=8000, log_level="debug", reload=True)
+    print("running")
