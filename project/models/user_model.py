@@ -30,8 +30,17 @@ class UserModel(BaseModel):
     status_id = Column(Integer, ForeignKey('md_user_status.id'),  nullable=False,default=1)
     status_details = relationship('MdUserStatus', back_populates='user_status')
 
-    
-
+    user_details = relationship("UserDetails", back_populates="user")
 
     class Config:
         orm_mode = True
+
+class UserDetails(BaseModel):
+    __tablename__ = "user_detais"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id =  Column(Integer, ForeignKey("users.id"), nullable=False, index=True,unique=True )
+    user = relationship("UserModel", back_populates="user_details")
+
+    country_id = Column(Integer, ForeignKey("md_countries.id"), nullable=False, index=True )
+    state_id = Column(Integer, ForeignKey("md_states.id"), nullable=True, index=True )
+    location_id = Column(Integer, ForeignKey("md_locations.id"), nullable=True, index=True )
