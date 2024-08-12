@@ -1,8 +1,8 @@
-"""first Time
+"""message to identify migration
 
-Revision ID: 7d7f20d39445
+Revision ID: a77aeaf33580
 Revises: 
-Create Date: 2024-08-12 11:39:55.912643
+Create Date: 2024-08-12 13:24:40.716286
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '7d7f20d39445'
+revision: str = 'a77aeaf33580'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -91,6 +91,7 @@ def upgrade() -> None:
     )
     op.create_table('md_timezones',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('zone', sa.String(length=55), nullable=True),
     sa.Column('name', sa.String(length=55), nullable=True),
     sa.Column('created_on', sa.DateTime(), nullable=True),
     sa.Column('updated_on', sa.DateTime(), nullable=True),

@@ -33,16 +33,16 @@ visit Swagger UI docs screen at 127.0.0.1:8000/docs  # here all api routing and 
 pip install alembic
 
 step 1: cd project then 
-step 2 Run command in terminal  `alembic init alembic` 
+step 2 Run command in terminal  `alembic init alembic` not required if already initstlized 
 step 3: mention your mysql connection string inside sqlalchemy.url
 
-step 4: in env.py file inside alembic dir mention all models inside target_metadata this way
-target_metadata = [user.Base.metadata, client.Base.metadata]
+step 4: in env.py file inside alembic dir mention all models inside target_metadata this way 
+target_metadata = [user.Base.metadata, client.Base.metadata] (not Required)
 
 step 5: alembic revision --autogenerate -m "message to identify migration"
 
 step 6: now below command will migrate all changes to the database
-alembic upgrade head
+step 7: alembic upgrade head
 
 step 7: whenever you make changes into the models then create the revision and upgrade it, even if you remove fields from the models upgrade command will be used
 alembic revision --autogenerate -m "second migration message"

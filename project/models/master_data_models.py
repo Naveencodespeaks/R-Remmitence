@@ -79,6 +79,7 @@ class MdTenantStatus(BaseModel):
 class MdTimeZone(BaseModel):
     __tablename__ = "md_timezones"
     id = Column(Integer, primary_key=True, autoincrement=True)
+    zone =  Column(String(55) )
     name = Column(String(55) )
     
 

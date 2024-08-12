@@ -125,7 +125,7 @@ def get_users(auth_user=Depends(AuthHandler().auth_wrapper), db: Session = Depen
 @router.get("/masterdata/migrate", response_description="User List")
 def get_users(db: Session = Depends(get_database_session)):
     
-    return {"status": "FAIL", "message": "Something went wrong---"}
+   
     try:
         
         json_directory = Path(__file__).resolve().parent.parent.parent / "migrate_data"
